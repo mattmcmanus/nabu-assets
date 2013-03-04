@@ -1,4 +1,4 @@
-/*
+/**
  * nabu-assets
  * https://github.com/mattmcmanus/nabu
  *
@@ -10,25 +10,25 @@
 
 var fs = require('fs'),
     path = require('path'),
-    mkdirp = require('mkdirp'),
-    mime = require('mime');
+    mkdirp = require('mkdirp');
 
 // Note to self
 // Pull any folder and it's content that doesn't start with _
 // Any file, that doesn't start with _
 
 exports.process = function(nabu, next) {
-  console.log("ASSets");
+  // Get rid of any path starting with underscore
+  var assets = nabu.files.find(nabu._files, function(file){ 
+    return (file.indexOf('./_') !== 0); 
+  });
 
-  // var assets = nabu.utils.findFiles(nabu.files, function(file){
-  //   return (mime.lookup(file).split('/')[0] !== 'text'); 
-  // });
-  
-  // // Update file list
-  // nabu.files = nabu.utils.removePaths(nabu.files, assets);
+  // Also get rid of any non-underscored rendereable files
+  assets = nabu.files.find(assets, function(file){
+    return (['.'+nabu.site.renderer, '.md', '.markdown'].indexOf(path.extname(file)) === -1); 
+  });
   
   // // Add assets to site
-  nabu.site.assets = {};
+  nabu.site.assets = assets;
   
   next(null, nabu);
 };
@@ -38,7 +38,7 @@ exports.process = function(nabu, next) {
  * Copy over all static assets to destination folder
  */
 var nabu = {};
-nabu.copyAssets = function() {
+exports.copyAssets = function() {
   this.site.assets.forEach(function(file) {
     var target = nabu.utils.targetPath(nabu, file);
     mkdirp.sync(path.dirname(target));

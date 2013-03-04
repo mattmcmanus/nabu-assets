@@ -23,7 +23,18 @@ var nabu_assets = require('../nabu-assets.js');
 */
 
 var nabu = {
-  site: {}
+  _files: [ './index.html.jade',
+    './sample.md',
+    './styles.css',
+    './_layouts/default.jade',
+    './_layouts/post.jade',
+    './_posts/2012-12-1-sample1.md',
+    './_posts/2013-01-12-sample2.md',
+    './images/anchor-porter.jpg' ],
+  files: require('../../nabu/lib/files.js'),
+  site: {
+    renderer: 'jade'
+  }
 };
 
 exports['nabu'] = {
@@ -31,24 +42,14 @@ exports['nabu'] = {
     done();
   },
   'process': function(test) {
-    test.expect(1);
+    test.expect(2);
     
     nabu_assets.process(nabu, function(err, nabu){
       test.ok(nabu.site.assets, "There shold be a nabu object");
-      // test.ok((nabu.site.length > 0), "There shold be at least 1 page");
+      test.equal(nabu.site.assets.length, 2, 'There should only be two assets');
       test.done();
     });
-    
   },
-  // 'generate': function(test) {
-  //   test.expect(3);
-  //   // tests here
-  //   nabu.generate();
-  //   test.ok(fs.existsSync('_site'), "_site dir exists");
-  //   test.ok(fs.existsSync('_site/index.html'), "The homepage exists");
-  //   test.ok(fs.existsSync('_site/images/anchor-porter.jpg'), "The image exists");
-  //   test.done();
-  // },
   tearDown: function(done) {
     done();
   }
