@@ -12,11 +12,18 @@ var fs = require('fs'),
     path = require('path'),
     mkdirp = require('mkdirp');
 
-// Note to self
-// Pull any folder and it's content that doesn't start with _
-// Any file, that doesn't start with _
+/**
+ * Copy over all static assets to destination folder
+ */
+function copyAssets(nabu) {
+  nabu.site.assets.forEach(function(file) {
+    var target = nabu.files.targetPath(nabu, file);
+    mkdirp.sync(path.dirname(target));
+    fs.createReadStream(file).pipe(fs.createWriteStream(target));
+  });
+}
 
-exports.process = function(nabu, next) {
+function parse(nabu, next) {
   // Get rid of any path starting with underscore
   var assets = nabu.files.find(nabu._files, function(file){ 
     return (file.indexOf('./_') !== 0); 
@@ -24,24 +31,15 @@ exports.process = function(nabu, next) {
 
   // Also get rid of any non-underscored rendereable files
   assets = nabu.files.find(assets, function(file){
-    return (['.'+nabu.site.renderer, '.md', '.markdown'].indexOf(path.extname(file)) === -1); 
+    return (file.indexOf(nabu.site.render) === -1 && !nabu.files.isMarkdownFile(file));
   });
   
   // // Add assets to site
   nabu.site.assets = assets;
+
+  copyAssets(nabu);
   
   next(null, nabu);
-};
+}
 
-
-/**
- * Copy over all static assets to destination folder
- */
-var nabu = {};
-exports.copyAssets = function() {
-  this.site.assets.forEach(function(file) {
-    var target = nabu.utils.targetPath(nabu, file);
-    mkdirp.sync(path.dirname(target));
-    fs.createReadStream(file).pipe(fs.createWriteStream(target));
-  });
-};
+exports = module.exports = parse;
